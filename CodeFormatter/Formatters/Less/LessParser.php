@@ -54,6 +54,7 @@ class LessParser extends BaseParser
 		$block_comment_open = false;
 		$line_comment_open = false;
 		$bracket_open = false;
+		$quote_open = false;
 		$comment_open = false;
 		$ct = $this->getCodeTheme();
 
@@ -64,12 +65,16 @@ class LessParser extends BaseParser
 			switch ($char) {
 				case ';'://attribute end
 					if (!$selector_open && !$comment_open && !$bracket_open) {
-						$attr = explode(':', trim($buffer));
+						$divider_pos = strpos(trim($buffer), ':');
+						$buffer = trim($buffer);
+						$attr[0] = substr($buffer, 0, $divider_pos);
+						$attr[1] = substr($buffer, $divider_pos, strlen($buffer));
 						$attrName = trim($attr[0]);
+						$attrVal = trim($attr[1], ': ');
 						if ($attrName[0] == '@') {
-							$attribute = new Variable($attrName, $attr[1], $ct);
+							$attribute = new Variable($attrName, $attrVal, $ct);
 						} else {
-							$attribute = new Attribute($attrName, $attr[1], $ct);
+							$attribute = new Attribute($attrName, $attrVal, $ct);
 						}
 						$this->elements[] = $attribute;
 						$buffer = '';
@@ -83,6 +88,13 @@ class LessParser extends BaseParser
 							$selector_open = true;
 						}
 						$counter++;
+					}
+					break;
+				case '"':
+					if (!$quote_open) {
+						$quote_open = true;
+					} else {
+						$quote_open = false;
 					}
 					break;
 				case '}'://selector end
@@ -113,7 +125,6 @@ class LessParser extends BaseParser
 					}
 					if (isset($src[$i + 1]) && in_array($src[$i + 1], array("\n", "\r"))) {
 						$this->elements[] = new EmptyLine();
-						$buffer = '';
 					}
 					break;
 				case '/':
@@ -128,7 +139,7 @@ class LessParser extends BaseParser
 					}
 					break;
 				case '(':
-					$bracket_open = true;
+					$bracket_open = false;
 					break;
 				case ')':
 					$bracket_open = false;
@@ -145,8 +156,7 @@ class LessParser extends BaseParser
 		}
 		if ($this->result)
 			return $this->result;
-
-		$this->result = $this->getCodeTheme()->render($this->elements);
+		$this->result = $this->getCodeTheme()->render($this->getElements());
 
 		return $this->result;
 	}
