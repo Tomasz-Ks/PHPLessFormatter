@@ -23,7 +23,7 @@ if (!empty($_POST) && isset($_POST['source'])) {
 
 	$less = new LessEngine($less_raw, $theme);
 	$lessFormated = $less->render();
-	$less->save('result.less');
+//	$less->save('result.less');
 }
 $time = (microtime(true) - $t);
 ?>
