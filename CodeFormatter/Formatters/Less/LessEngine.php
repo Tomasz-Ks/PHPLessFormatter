@@ -2,6 +2,7 @@
 
 namespace CodeFormatter\Formatters\Less;
 
+use CodeFormatter\Common\BaseParser;
 use CodeFormatter\Common\BaseTheme;
 
 class LessEngine
@@ -10,12 +11,13 @@ class LessEngine
 	/**
 	 * @var LessParser
 	 */
-	private $less = '';
+	public $less = '';
 
 	private $result;
 
 	public function __construct($less_source, BaseTheme $code_theme)
 	{
+//        $less = $this->clear($less_source);
         $this->less = new LessParser($less_source, $code_theme);
         $this->process();
     }
@@ -26,7 +28,7 @@ class LessEngine
 	}
 
     public function render(){
-        return $this->result;
+        return  $this->result;
     }
 
 	public function save($file_name = null)

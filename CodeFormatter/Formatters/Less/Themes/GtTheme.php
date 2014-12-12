@@ -110,6 +110,7 @@ class GtTheme extends BaseTheme
 	 */
 	public function render($elements = array())
 	{
+
 		$result = '';
 		$keys = array_keys($elements);
 		$count = count($elements);
