@@ -76,6 +76,7 @@ class LessParser extends BaseParser
 						} else {
 							$attribute = new Attribute($attrName, $attrVal, $ct);
 						}
+						$attribute->setSource($buffer);
 						$this->elements[] = $attribute;
 						$buffer = '';
 					}
@@ -114,8 +115,14 @@ class LessParser extends BaseParser
 				case '\\'://find block comment start
 					if (isset($src[$i + 1]) && '*' === $src[$i + 1]) {
 						$block_comment_open = $comment_open = true;
+						break;
 					}
-					break;
+					if ('*' === $src[$i - 1]) {//find block comment end
+						$block_comment_open = $comment_open = false;
+						$this->elements[] = new BlockComment(trim($buffer), $ct);
+						$buffer = '';
+						break;
+					}
 				case "\n"://find new line
 					if (!$selector_open && $line_comment_open && $comment = trim($buffer)) {
 						$this->elements[] = new LineComment($comment, $ct);
@@ -128,12 +135,6 @@ class LessParser extends BaseParser
 					}
 					break;
 				case '/':
-					if ('*' === $src[$i - 1]) {//find block comment end
-						$block_comment_open = $comment_open = false;
-						$this->elements[] = new BlockComment(trim($buffer), $ct);
-						$buffer = '';
-						break;
-					}
 					if (isset($src[$i + 1]) && $src[$i + 1] == '/' && !$line_comment_open) {
 						$line_comment_open = $comment_open = true;
 					}
